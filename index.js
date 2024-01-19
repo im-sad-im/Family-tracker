@@ -5,6 +5,7 @@ import pg from "pg";
 const app = express();
 const port = 3000;
 
+//Connect to PostgreSQL database
 const db = new pg.Client({
   user: "postgres",
   host: "localhost",
@@ -14,6 +15,7 @@ const db = new pg.Client({
 });
 db.connect();
 
+//Middleware for handling URL-encoded data and static files
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
@@ -24,7 +26,7 @@ let users = [
   { id: 2, name: "Jack", color: "powderblue" },
 ];
 
-
+//Fn to check visited countries for the current user
 async function checkVisisted() {
   const result = await db.query(
     "SELECT country_code FROM visited_countries JOIN users ON users.id = visited_countries.user_id WHERE user_id = $1;",
@@ -37,7 +39,7 @@ async function checkVisisted() {
   return countries;
 }
 
-
+//Fn to get the current user from the database
 async function getCurrentUser() {
   const result = await db.query("SELECT * FROM users");
   users = result.rows; //Update array of users by retreiving from db
@@ -45,7 +47,7 @@ async function getCurrentUser() {
 }
 
 
-//Get hoem route
+//Route for the home page
 app.get("/", async (req, res) => {
   const countries = await checkVisisted();
   const currentUser = await getCurrentUser();
@@ -59,7 +61,7 @@ app.get("/", async (req, res) => {
   });
 });
 
-//Insert visited countries
+//Route to handle adding visited countries
 app.post("/add", async (req, res) => {
   const input = req.body["country"];
 
@@ -85,7 +87,7 @@ app.post("/add", async (req, res) => {
   }
 });
 
-//Switch between user 
+//Route to switch between users
 app.post("/user", async (req, res) => {
   if (req.body.add == "new") {
     res.render("new.ejs");
@@ -97,7 +99,7 @@ app.post("/user", async (req, res) => {
   }
 });
 
-//Add new users
+//Route to add new users
 app.post("/new", async (req, res) => {
   //Hint: The RETURNING keyword can return the data that was inserted.
   //https://www.postgresql.org/docs/current/dml-returning.html
@@ -118,6 +120,7 @@ app.post("/new", async (req, res) => {
   }
 });
 
+//Start the server on port 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
 });
