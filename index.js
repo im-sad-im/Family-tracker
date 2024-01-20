@@ -1,9 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import pg from "pg";
-import "dotenv/config"
-
-console.log()
+import "dotenv/config";
 
 const app = express();
 const port = 3000;
@@ -67,6 +65,7 @@ app.get("/", async (req, res) => {
 //Route to handle adding visited countries
 app.post("/add", async (req, res) => {
   const input = req.body["country"];
+  const currentUser = await getCurrentUser();
 
   try {
     const result = await db.query(
